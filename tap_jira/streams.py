@@ -12,7 +12,12 @@ from typing import TYPE_CHECKING, Any
 from singer_sdk import typing as th  # JSON Schema typing helpers
 from singer_sdk.pagination import JSONPathPaginator
 
-from tap_jira.client import JiraStartAtPaginatedStream, JiraStream, ResumableAPIError
+from tap_jira.client import (
+    JiraStartAtPaginatedStream,
+    JiraStream,
+    ResumableAPIError,
+    get_domain_url,
+)
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -2529,7 +2534,7 @@ class BoardStream(JiraStartAtPaginatedStream):
         if cloud_id:
             return f"https://api.atlassian.com/ex/jira/{cloud_id}/rest/agile/1.0"
         domain = self.config["domain"]
-        return f"https://{domain}/rest/agile/1.0"
+        return f"{get_domain_url(domain)}/rest/agile/1.0"
 
     @override
     def get_child_context(self, record: Record, context: Context | None) -> Context:
@@ -2583,7 +2588,7 @@ class SprintStream(JiraStartAtPaginatedStream):
         if cloud_id:
             return f"https://api.atlassian.com/ex/jira/{cloud_id}/rest/agile/1.0"
         domain = self.config["domain"]
-        return f"https://{domain}/rest/agile/1.0"
+        return f"{get_domain_url(domain)}/rest/agile/1.0"
 
     @override
     def post_process(

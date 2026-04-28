@@ -38,6 +38,32 @@ class TestCloudIdURLConstruction:
         expected_url = "https://test.atlassian.net/rest/api/3"
         assert stream.url_base == expected_url
 
+    def test_platform_api_url_with_domain_as_url(self) -> None:
+        """Test Platform API URL construction when domain includes a scheme."""
+        tap = TapJira(
+            config={
+                "domain": "https://test.atlassian.net/",
+                "email": "test@example.com",
+                "api_token": "test-token",
+            },
+        )
+        stream = IssueStream(tap)
+        expected_url = "https://test.atlassian.net/rest/api/3"
+        assert stream.url_base == expected_url
+
+    def test_platform_api_url_forces_https_for_http_domain_url(self) -> None:
+        """Test Platform API URL construction converts http domains to https."""
+        tap = TapJira(
+            config={
+                "domain": "http://test.atlassian.net/",
+                "email": "test@example.com",
+                "api_token": "test-token",
+            },
+        )
+        stream = IssueStream(tap)
+        expected_url = "https://test.atlassian.net/rest/api/3"
+        assert stream.url_base == expected_url
+
     def test_platform_api_url_no_port_suffix(self) -> None:
         """Test that Platform API URL does not include :443 port suffix."""
         tap = TapJira(
@@ -72,6 +98,22 @@ class TestCloudIdURLConstruction:
         tap = TapJira(
             config={
                 "domain": "test.atlassian.net",
+                "email": "test@example.com",
+                "api_token": "test-token",
+            },
+        )
+        board_stream = BoardStream(tap)
+        sprint_stream = SprintStream(tap)
+
+        expected_url = "https://test.atlassian.net/rest/agile/1.0"
+        assert board_stream.url_base == expected_url
+        assert sprint_stream.url_base == expected_url
+
+    def test_agile_api_url_with_domain_as_url(self) -> None:
+        """Test Agile API URL construction when domain includes a scheme."""
+        tap = TapJira(
+            config={
+                "domain": "https://test.atlassian.net/",
                 "email": "test@example.com",
                 "api_token": "test-token",
             },
