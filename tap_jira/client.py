@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from typing import TYPE_CHECKING, Any, TypeVar
+from urllib.parse import urlsplit
 
 import requests.auth
 from singer_sdk.streams import RESTStream
@@ -23,6 +24,16 @@ if TYPE_CHECKING:
 
 
 _TNextPageToken = TypeVar("_TNextPageToken")
+
+
+def get_domain_url(domain: str) -> str:
+    """Return the configured Jira domain as an HTTPS URL without a trailing slash."""
+    stripped_domain = domain.strip().rstrip("/")
+    parsed_domain = urlsplit(stripped_domain)
+    if parsed_domain.netloc:
+        return f"https://{parsed_domain.netloc}"
+
+    return f"https://{stripped_domain}"
 
 
 class ResumableAPIError(Exception):
@@ -49,7 +60,7 @@ class JiraStream(RESTStream[_TNextPageToken]):
         if cloud_id:
             return f"https://api.atlassian.com/ex/jira/{cloud_id}/rest/api/3"
         domain = self.config["domain"]
-        return f"https://{domain}/rest/api/3"
+        return f"{get_domain_url(domain)}/rest/api/3"
 
     @override
     @property
